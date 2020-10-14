@@ -1,46 +1,9 @@
 -- wengwengweng
 
 local http = require("http")
+local httph = require("httph")
 local fs = require("fs")
-
--- local bytes = fs.read_bytes("hi.png")
-
-local entries = fs.read_dir(".")
-
-for i, v in ipairs(entries) do
-	print(i, v)
-end
-
-function t(tag, attrs, children)
-
-	local str = ""
-
-	str = "<" .. tag
-
-	for k, v in pairs(attrs) do
-		if (type(v) == "string") then
-			v = "\"" .. v .. "\""
-		end
-		str = str .. " " .. k .. "=" .. v
-	end
-
-	str = str .. ">"
-
-	if (type(children) == "string") then
-		str = str .. children
-	elseif (type(children) == "table") then
-		for _, v in ipairs(children) do
-			str = str .. v
-		end
-	end
-
-	if (children ~= nil) then
-		str = str .. "</" .. tag .. ">"
-	end
-
-	return str
-
-end
+local t = httph.tag
 
 local page = t("html", {}, {
 	t("head", {}, {}),
@@ -50,15 +13,10 @@ local page = t("html", {}, {
 	}),
 })
 
-http.listen(8000, function(req)
-	print(req.url)
+http.serve(8000, function(req)
 	return {
 		status = 200,
-		body = page,
-		headers = {
-			["Content-Type"] = "text/html",
-			["Test"] = req.url,
-		},
+		body = "no",
 	}
 end)
 

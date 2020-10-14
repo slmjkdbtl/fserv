@@ -3,6 +3,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include <lua/lua.h>
 #include <lua/lualib.h>
@@ -76,10 +79,36 @@ static int l_read_dir(lua_State *L) {
 
 }
 
+int l_is_file(lua_State *L) {
+	const char *path = luaL_checkstring(L, 1);
+	struct stat sb;
+	bool is = stat(path, &sb) == 0 && S_ISREG(sb.st_mode);
+	lua_pushboolean(L, is);
+	return 1;
+}
+
+int l_is_dir(lua_State *L) {
+	const char *path = luaL_checkstring(L, 1);
+	struct stat sb;
+	bool is = stat(path, &sb) == 0 && S_ISDIR(sb.st_mode);
+	lua_pushboolean(L, is);
+	return 1;
+}
+
+int l_extname(lua_State *L) {
+	const char *path = luaL_checkstring(L, 1);
+	const char *dot = strrchr(path, '.');
+	lua_pushstring(L, dot + 1);
+	return 1;
+}
+
 static const luaL_Reg funcs[] = {
 	{ "read_text", l_read_text, },
 	{ "read_bytes", l_read_bytes, },
 	{ "read_dir", l_read_dir, },
+	{ "is_file", l_is_file, },
+	{ "is_dir", l_is_dir, },
+	{ "extname", l_extname, },
 	{ NULL, NULL, }
 };
 

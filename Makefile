@@ -15,8 +15,16 @@ endif
 
 LD_FLAGS += -l lua
 
-%: src/%.c
-	$(CC) $(C_FLAGS) $(LD_FLAGS) -o $@.so $^
+.PHONY: all
+all: build/fs.so build/http.so build/httph.lua build/json.lua
+
+build/%.so: src/%.c
+	@mkdir -p build
+	$(CC) $(C_FLAGS) $(LD_FLAGS) -o $@ $^
+
+build/%.lua: src/%.lua
+	@mkdir -p build
+	cp $^ $@
 
 .PHONY: run
 run:
@@ -24,5 +32,16 @@ run:
 
 .PHONY: clean
 clean:
-	rm *.so
+	rm -rf build
+
+.PHONY: install
+install: all
+ifndef LUA_PATH
+	$(error LUA_PATH undefined)
+endif
+ifndef LUA_CPATH
+	$(error LUA_CPATH undefined)
+endif
+	cp build/*.lua $(subst ?.lua,,$(LUA_PATH))
+	cp build/*.so $(subst ?.so,,$(LUA_CPATH))
 
