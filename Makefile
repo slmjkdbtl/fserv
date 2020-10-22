@@ -42,6 +42,6 @@ clean:
 	rm -rf build
 
 .PHONY: install
-install: $(LIB_TARGET)
+install: $(BIN_TARGET)
 	install $(BIN_TARGET) $(INSTALL_BIN)
 
