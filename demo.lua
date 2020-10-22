@@ -1,8 +1,5 @@
 -- wengwengweng
 
-local http = require("http")
-local httph = require("httph")
-local fs = require("fs")
 local t = httph.tag
 
 local page = t("html", {}, {
@@ -16,7 +13,7 @@ local page = t("html", {}, {
 http.serve(8000, function(req)
 	return {
 		status = 200,
-		body = "no",
+		body = page,
 	}
 end)
 

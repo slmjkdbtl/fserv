@@ -1,47 +1,41 @@
 # wengwengweng
 
-CC := cc
+CC := clang
 
 C_FLAGS += -Wall
 C_FLAGS += -Wpedantic
 C_FLAGS += -std=c99
-C_FLAGS += -I ext
-C_FLAGS += -shared
-C_FLAGS += -fPIC
+C_FLAGS += -I ext/inc
 
-ifeq ($(MODE),release)
+ifdef RELEASE
 C_FLAGS += -O3
 endif
 
+LD_FLAGS += -L ext/lib
 LD_FLAGS += -l lua
 
-.PHONY: all
-all: build/fs.so build/http.so build/httph.lua build/json.lua
+BIN_TARGET := build/fserv
 
-build/%.so: src/%.c
+SRC_FILES := $(wildcard src/*.c)
+
+INSTALL_TOP := /usr/local
+INSTALL_BIN := $(INSTALL_TOP)/bin
+INSTALL_INC := $(INSTALL_TOP)/include
+INSTALL_LIB := $(INSTALL_TOP)/lib
+
+$(BIN_TARGET): $(SRC_FILES)
 	@mkdir -p build
 	$(CC) $(C_FLAGS) $(LD_FLAGS) -o $@ $^
 
-build/%.lua: src/%.lua
-	@mkdir -p build
-	cp $^ $@
-
 .PHONY: run
-run:
-	lua demo.lua
+run: $(BIN_TARGET)
+	$(BIN_TARGET) demo.lua
 
 .PHONY: clean
 clean:
 	rm -rf build
 
 .PHONY: install
-install: all
-ifndef LUA_PATH
-	$(error LUA_PATH undefined)
-endif
-ifndef LUA_CPATH
-	$(error LUA_CPATH undefined)
-endif
-	cp build/*.lua $(subst ?.lua,,$(LUA_PATH))
-	cp build/*.so $(subst ?.so,,$(LUA_CPATH))
+install: $(LIB_TARGET)
+	install $(BIN_TARGET) $(INSTALL_BIN)
 

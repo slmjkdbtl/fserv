@@ -21,7 +21,7 @@ static int l_read_text(lua_State *L) {
 	fseek(file, 0, SEEK_SET);
 
 	char *buffer = malloc(size + 1);
-	size_t r_size = fread(buffer, 1, size, file);
+	fread(buffer, 1, size, file);
 
 	buffer[size] = '\0';
 
@@ -43,7 +43,7 @@ static int l_read_bytes(lua_State *L) {
 	fseek(file, 0, SEEK_SET);
 
 	void *buf = lua_newuserdata(L, size);
-	size_t r_size = fread(buf, 1, size, file);
+	fread(buf, 1, size, file);
 
 	fclose(file);
 

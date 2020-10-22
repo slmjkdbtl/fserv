@@ -1,6 +1,5 @@
 -- wengwengweng
 
-local fs = require("fs")
 local httph = {}
 
 local mimes = {
@@ -35,19 +34,9 @@ local mimes = {
 	["gz"] = "application/gzip",
 }
 
-function httph.route(pat, handler)
-	return function(req)
-		if (req.target == pat) then
-			return handler(req)
-		end
-	end
-end
-
-function httph.static(path)
+function httph.file(path)
 
 	return function(req)
-
-		local path = path .. req.target
 
 		if (fs.is_file(path)) then
 
@@ -71,11 +60,36 @@ function httph.static(path)
 
 end
 
-function httph.html(t)
-	return "<!DOCTYPE html>" .. t
+function httph.route(method, pat, handler)
+	return function(req)
+		if (req.target == pat and req.method == method) then
+			return handler(req)
+		end
+	end
 end
 
-function httph.handle(handlers)
+function httph.static(path)
+	return function(req)
+		local path = path .. req.target
+		if (req.method == "GET") then
+			return httph.file(path)(req)
+		end
+	end
+end
+
+function httph.html(t)
+	return function(req)
+		return {
+			status = 200,
+			body = "<!DOCTYPE html>" .. t .. "\n",
+			headers = {
+				["Content-Type"] = "text/html",
+			},
+		}
+	end
+end
+
+function httph.handlers(handlers)
 	return function(req)
 		for _, f in ipairs(handlers) do
 			local res = f(req)
