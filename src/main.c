@@ -19,13 +19,13 @@ int luaopen_http(lua_State *L);
 
 int luaopen_json(lua_State *L) {
 	json_lua[json_lua_len] = '\0';
-	luaL_dostring(L, json_lua);
+	luaL_dostring(L, (const char*)json_lua);
 	return 1;
 }
 
 int luaopen_httph(lua_State *L) {
 	httph_lua[httph_lua_len] = '\0';
-	luaL_dostring(L, httph_lua);
+	luaL_dostring(L, (const char*)httph_lua);
 	return 1;
 }
 
@@ -40,7 +40,7 @@ void run(const char *path) {
 	luaL_requiref(L, "httph", luaopen_httph, true);
 
 	std_lua[std_lua_len] = '\0';
-	luaL_dostring(L, std_lua);
+	luaL_dostring(L, (const char*)std_lua);
 
 	if (luaL_dofile(L, path) != LUA_OK) {
 		fprintf(stderr, "%s\n", lua_tostring(L, -1));

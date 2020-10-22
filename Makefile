@@ -13,6 +13,7 @@ endif
 
 LD_FLAGS += -L ext/lib
 LD_FLAGS += -l lua
+LD_FLAGS += -l m
 
 BIN_TARGET := build/fserv
 
@@ -23,13 +24,18 @@ INSTALL_BIN := $(INSTALL_TOP)/bin
 INSTALL_INC := $(INSTALL_TOP)/include
 INSTALL_LIB := $(INSTALL_TOP)/lib
 
-$(BIN_TARGET): $(SRC_FILES)
+$(BIN_TARGET): $(SRC_FILES) res
 	@mkdir -p build
-	$(CC) $(C_FLAGS) $(LD_FLAGS) -o $@ $^
+	$(CC) $(C_FLAGS) $(LD_FLAGS) -o $(BIN_TARGET) $(SRC_FILES)
 
 .PHONY: run
 run: $(BIN_TARGET)
 	$(BIN_TARGET) demo.lua
+
+.PHONY: res
+res:
+	rm -rf src/res
+	sh scripts/cres.sh res src/res
 
 .PHONY: clean
 clean:

@@ -330,6 +330,7 @@ int main() {
 #include <assert.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 
 #ifdef KQUEUE
 #include <sys/event.h>
