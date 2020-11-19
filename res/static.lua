@@ -13,9 +13,9 @@ http.serve(port, function(req)
 	end
 
 	if (fs.is_dir(path)) then
-		return httph.dir(path)
+		return www.dir(path)
 	elseif (fs.is_file(path)) then
-		return httph.file(path)
+		return www.file(path)
 	end
 
 	return {

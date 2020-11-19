@@ -43,8 +43,15 @@ void run(const char *path) {
 	std_lua[std_lua_len] = '\0';
 	luaL_dostring(L, (const char*)std_lua);
 
-	if (luaL_dofile(L, path) != LUA_OK) {
-		fprintf(stderr, "%s\n", lua_tostring(L, -1));
+	if (path) {
+		if (luaL_dofile(L, path) != LUA_OK) {
+			fprintf(stderr, "%s\n", lua_tostring(L, -1));
+		}
+	} else {
+		static_lua[static_lua_len] = '\0';
+		if (luaL_dostring(L, (const char*)static_lua) != LUA_OK) {
+			fprintf(stderr, "%s\n", lua_tostring(L, -1));
+		}
 	}
 
 	lua_close(L);
@@ -54,6 +61,8 @@ void run(const char *path) {
 int main(int argc, char **argv) {
 	if (argc >= 2) {
 		run(argv[1]);
+	} else {
+		run(NULL);
 	}
 }
 
