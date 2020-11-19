@@ -16,6 +16,10 @@ static int l_read_text(lua_State *L) {
 	const char *path = luaL_checkstring(L, 1);
 	FILE *file = fopen(path, "r");
 
+	if (!file) {
+		return 0;
+	}
+
 	fseek(file, 0, SEEK_END);
 	size_t size = ftell(file);
 	fseek(file, 0, SEEK_SET);
@@ -38,6 +42,10 @@ static int l_read_bytes(lua_State *L) {
 	const char *path = luaL_checkstring(L, 1);
 	FILE *file = fopen(path, "rb");
 
+	if (!file) {
+		return 0;
+	}
+
 	fseek(file, 0, SEEK_END);
 	size_t size = ftell(file);
 	fseek(file, 0, SEEK_SET);
@@ -59,11 +67,15 @@ static int l_read_dir(lua_State *L) {
 
 	DIR *dir = opendir(path);
 
+	if (!dir) {
+		return 0;
+	}
+
 	lua_newtable(L);
 
 	while (dir) {
 		if ((dp = readdir(dir)) != NULL) {
-			if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0) {
+			if (dp->d_name[0] != '.') {
 				lua_pushnumber(L, count + 1);
 				lua_pushstring(L, dp->d_name);
 				lua_settable(L, -3);
