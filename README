@@ -1,1 +1,20 @@
-lua http runtime
+ABOUT
+
+  'fserv' is a minimal lua http runtime
+
+DEMO
+
+  see my website's source [0]
+
+  [0] https://github.com/slmjkdbtl/space55.xyz
+
+USAGE
+
+  $ fserv ?.lua
+
+    will run the lua file
+
+  $ fserv
+
+    without args will serve static files in current directory, use PORT env variable to set port, defaults to 80
+
