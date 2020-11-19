@@ -198,7 +198,17 @@ function www.styles(list)
 	end
 
 	for sel, sheet in pairs(list) do
-		text = text .. sel .. handle_sheet_ex(sel, sheet)
+		if (sel == "@keyframes") then
+			for name, map in pairs(sheet) do
+				text = text .. "@keyframes " .. name .. "{"
+				for time, fsheet in pairs(map) do
+					text = text .. time .. handle_sheet(fsheet)
+				end
+				text = text .. "}"
+			end
+		else
+			text = text .. sel .. handle_sheet_ex(sel, sheet)
+		end
 	end
 
 	return text
