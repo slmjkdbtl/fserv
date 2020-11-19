@@ -2,38 +2,33 @@
 
 CC := cc
 
-C_FLAGS += -Wall
-C_FLAGS += -Wpedantic
-C_FLAGS += -std=c99
-C_FLAGS += -I ext
+CFLAGS += -Wall
+CFLAGS += -Wpedantic
+CFLAGS += -std=c99
+CFLAGS += -Iext
 
 ifdef RELEASE
-C_FLAGS += -O3
+CFLAGS += -O3
 endif
 
-LD_FLAGS += -l lua
-LD_FLAGS += -l m
+LDLIBS += -llua
+LDLIBS += -lm
 
-BIN_TARGET := build/fserv
-
+BIN := build/fserv
 SRC_FILES := $(wildcard src/*.c)
+PREFIX := /usr/local
 
-INSTALL_TOP := /usr/local
-INSTALL_BIN := $(INSTALL_TOP)/bin
-INSTALL_INC := $(INSTALL_TOP)/include
-INSTALL_LIB := $(INSTALL_TOP)/lib
-
-$(BIN_TARGET): $(SRC_FILES) res
+$(BIN): $(SRC_FILES) res
 	@mkdir -p build
-	$(CC) $(C_FLAGS) $(LD_FLAGS) -o $(BIN_TARGET) $(SRC_FILES)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $(BIN) $(SRC_FILES)
 
 .PHONY: run
-run: $(BIN_TARGET)
-	$(BIN_TARGET)
+run: $(BIN)
+	$(BIN)
 
 .PHONY: run-lua
-run-lua: $(BIN_TARGET)
-	$(BIN_TARGET) demo.lua
+run-lua: $(BIN)
+	$(BIN) demo.lua
 
 .PHONY: res
 res:
@@ -45,6 +40,6 @@ clean:
 	rm -rf build
 
 .PHONY: install
-install: $(BIN_TARGET)
-	install $(BIN_TARGET) $(INSTALL_BIN)
+install: $(BIN)
+	install -m 0755 $(BIN) $(PREFIX)/bin
 
