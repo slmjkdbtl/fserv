@@ -52,7 +52,7 @@ function www.dir(path)
 			t("head", {}, {
 				t("title", {}, path),
 				t("meta", { charset = "utf-8", }),
-				t("style", {}, www.style({
+				t("style", {}, www.styles({
 					["*"] = {
 						["font-family"] = "Monospace",
 					},
@@ -61,10 +61,10 @@ function www.dir(path)
 					},
 					["a"] = {
 						["color"] = "blue",
-					},
-					["a:hover"] = {
-						["color"] = "white",
-						["background"] = "blue",
+						[":hover"] = {
+							["color"] = "white",
+							["background"] = "blue",
+						},
 					},
 				}))
 			}),
@@ -155,33 +155,50 @@ function www.tag(tag, attrs, children)
 
 end
 
-function www.style(list)
+function www.styles(list)
 
 	local text = ""
 
-	for sel, sheet in pairs(list) do
+	function handle_sheet(s)
+		local t = "{"
+		for k, v in pairs(s) do
+			t = t .. k .. ":" .. v .. ";"
+		end
+		t = t .. "}"
+		return t
+	end
+
+	function handle_sheet_ex(sel, sheet)
+		local t = "{"
 		local post = ""
-		text = text .. sel .. "{"
 		for key, val in pairs(sheet) do
+			-- media
 			if key == "@media" then
 				for cond, msheet in pairs(val) do
-					post = post .. "@media " .. cond .. "{" .. sel .. "{"
-					for mkey, mval in pairs(msheet) do
-						post = post .. mkey .. ":" .. mval .. ";"
-					end
-					post = post .. "}}"
+					post = post .. "@media " .. cond .. "{" .. sel .. handle_sheet(msheet) .. "}"
 				end
+			-- pseudo class
 			elseif key:sub(1, 1) == ":" then
-				post = post .. sel .. key .. "{"
-				for mkey, mval in pairs(val) do
-					post = post .. mkey .. ":" .. mval .. ";"
-				end
-				post = post .. "}"
+				local nsel = sel .. key
+				post = post .. nsel .. handle_sheet_ex(nsel, val)
+			-- self
+			elseif key:sub(1, 1) == "&" then
+				local nsel = sel .. key:sub(2, #key)
+				post = post .. nsel .. handle_sheet_ex(nsel, val)
+			-- nesting child
+			elseif type(val) == "table" then
+				local nsel = sel .. " " .. key
+				post = post .. nsel .. handle_sheet_ex(nsel, val)
 			else
-				text = text .. key .. ":" .. val .. ";"
+				t = t .. key .. ":" .. val .. ";"
 			end
 		end
-		text = text .. "}" .. post
+		t = t .. "}" .. post
+		return t
+	end
+
+	for sel, sheet in pairs(list) do
+		text = text .. sel .. handle_sheet_ex(sel, sheet)
 	end
 
 	return text

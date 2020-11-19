@@ -1,12 +1,22 @@
 ABOUT
 
-  'fserv' is a minimal lua http runtime
+  'fserv' is a minimal lua http runtime, with a focus on server side rendering and static files
 
 DEMO
 
   see my website's source [0]
 
   [0] https://github.com/slmjkdbtl/space55.xyz
+
+BUILD
+
+  $ make
+
+    builds locally under 'build/'
+
+  $ make install
+
+    installs the binary to /usr/local/bin
 
 USAGE
 
