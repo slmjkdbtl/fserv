@@ -24,6 +24,7 @@ int luaopen_json(lua_State *L) {
 	return 1;
 }
 
+// TODO: dostring filename?
 int luaopen_www(lua_State *L) {
 	www_lua[www_lua_len] = '\0';
 	luaL_dostring(L, (const char*)www_lua);

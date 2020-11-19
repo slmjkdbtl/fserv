@@ -1,17 +1,16 @@
 # wengwengweng
 
-CC := clang
+CC := cc
 
 C_FLAGS += -Wall
 C_FLAGS += -Wpedantic
 C_FLAGS += -std=c99
-C_FLAGS += -I ext/inc
+C_FLAGS += -I ext
 
 ifdef RELEASE
 C_FLAGS += -O3
 endif
 
-LD_FLAGS += -L ext/lib
 LD_FLAGS += -l lua
 LD_FLAGS += -l m
 
