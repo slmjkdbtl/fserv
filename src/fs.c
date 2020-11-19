@@ -117,6 +117,51 @@ static int l_extname(lua_State *L) {
 	return 1;
 }
 
+static char encoding_table[] = {
+	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+	'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+	'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+	'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+	'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+	'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+	'w', 'x', 'y', 'z', '0', '1', '2', '3',
+	'4', '5', '6', '7', '8', '9', '+', '/',
+};
+
+static int mod_table[] = { 0, 2, 1, };
+
+static char *base64_encode(const char *input, size_t isize, size_t *osize) {
+
+	*osize = 4 * ((isize + 2) / 3);
+
+	char *output = malloc(*osize);
+	if (output == NULL) return NULL;
+
+	for (int i = 0, j = 0; i < isize;) {
+
+		uint32_t octet_a = i < isize ? (unsigned char)input[i++] : 0;
+		uint32_t octet_b = i < isize ? (unsigned char)input[i++] : 0;
+		uint32_t octet_c = i < isize ? (unsigned char)input[i++] : 0;
+
+		uint32_t triple = (octet_a << 0x10) + (octet_b << 0x08) + octet_c;
+
+		output[j++] = encoding_table[(triple >> 3 * 6) & 0x3F];
+		output[j++] = encoding_table[(triple >> 2 * 6) & 0x3F];
+		output[j++] = encoding_table[(triple >> 1 * 6) & 0x3F];
+		output[j++] = encoding_table[(triple >> 0 * 6) & 0x3F];
+	}
+
+	for (int i = 0; i < mod_table[isize % 3]; i++) {
+		output[*osize - 1 - i] = '=';
+	}
+
+	*osize = *osize -2 + mod_table[isize % 3];
+	output[*osize] = 0;
+
+	return output;
+
+}
+
 static int l_base64(lua_State *L) {
 
 	const char *path = luaL_checkstring(L, 1);
@@ -130,29 +175,15 @@ static int l_base64(lua_State *L) {
 	size_t size = ftell(file);
 	fseek(file, 0, SEEK_SET);
 
-// 	unsigned char *buf = malloc(size);
-// 	fread(buf, 1, size, file);
-
-	// TODO: using base64 cmd for now, ugly don't look
-
+	unsigned char *bytes = malloc(size);
+	fread(bytes, 1, size, file);
 	fclose(file);
 
-	char cmd_buf[1024];
-	sprintf(cmd_buf, "base64 %s", path);
-	char *buf = malloc(size * 1.5);
-	FILE *pf;
+	size_t osize;
+	char *data = base64_encode(bytes, size, &osize);
 
-	if ((pf = popen(cmd_buf, "r")) == NULL) {
-		return 0;
-	}
-
-	while (fgets(buf, size * 1.5, pf) != NULL);
-
-	if (pclose(pf)) {
-		return 0;
-	}
-
-	lua_pushstring(L, buf);
+	lua_pushstring(L, data);
+	free(data);
 
 	return 1;
 
