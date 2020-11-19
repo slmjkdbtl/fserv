@@ -91,7 +91,7 @@ static int l_read_dir(lua_State *L) {
 
 }
 
-int l_is_file(lua_State *L) {
+static int l_is_file(lua_State *L) {
 	const char *path = luaL_checkstring(L, 1);
 	struct stat sb;
 	bool is = stat(path, &sb) == 0 && S_ISREG(sb.st_mode);
@@ -99,7 +99,7 @@ int l_is_file(lua_State *L) {
 	return 1;
 }
 
-int l_is_dir(lua_State *L) {
+static int l_is_dir(lua_State *L) {
 	const char *path = luaL_checkstring(L, 1);
 	struct stat sb;
 	bool is = stat(path, &sb) == 0 && S_ISDIR(sb.st_mode);
@@ -107,7 +107,7 @@ int l_is_dir(lua_State *L) {
 	return 1;
 }
 
-int l_extname(lua_State *L) {
+static int l_extname(lua_State *L) {
 	const char *path = luaL_checkstring(L, 1);
 	const char *dot = strrchr(path, '.');
 	if (!dot) {
@@ -117,6 +117,47 @@ int l_extname(lua_State *L) {
 	return 1;
 }
 
+static int l_base64(lua_State *L) {
+
+	const char *path = luaL_checkstring(L, 1);
+	FILE *file = fopen(path, "rb");
+
+	if (!file) {
+		return 0;
+	}
+
+	fseek(file, 0, SEEK_END);
+	size_t size = ftell(file);
+	fseek(file, 0, SEEK_SET);
+
+// 	unsigned char *buf = malloc(size);
+// 	fread(buf, 1, size, file);
+
+	// TODO: using base64 cmd for now, ugly don't look
+
+	fclose(file);
+
+	char cmd_buf[1024];
+	sprintf(cmd_buf, "base64 %s", path);
+	char *buf = malloc(size * 1.5);
+	FILE *pf;
+
+	if ((pf = popen(cmd_buf, "r")) == NULL) {
+		return 0;
+	}
+
+	while (fgets(buf, size * 1.5, pf) != NULL);
+
+	if (pclose(pf)) {
+		return 0;
+	}
+
+	lua_pushstring(L, buf);
+
+	return 1;
+
+}
+
 static const luaL_Reg funcs[] = {
 	{ "read_text", l_read_text, },
 	{ "read_bytes", l_read_bytes, },
@@ -124,6 +165,7 @@ static const luaL_Reg funcs[] = {
 	{ "is_file", l_is_file, },
 	{ "is_dir", l_is_dir, },
 	{ "extname", l_extname, },
+	{ "base64", l_base64, },
 	{ NULL, NULL, }
 };
 

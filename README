@@ -1,6 +1,10 @@
 ABOUT
 
-  'fserv' is a minimal lua http runtime, with a focus on server side rendering and static files
+  'fserv' is a minimal lua http runtime, with a focus on
+
+    - server side rendering
+    - static files
+    - archivability
 
 DEMO
 

@@ -84,11 +84,11 @@ function www.file(path)
 	if (fs.is_file(path)) then
 
 		local ext = fs.extname(path)
-		local t = mimes[ext]
+		local mime = mimes[ext]
 		local headers = {}
 
-		if (t) then
-			headers["Content-Type"] = t
+		if (mime) then
+			headers["Content-Type"] = mime
 		end
 
 		return {
@@ -120,8 +120,22 @@ function www.html(t)
 	}
 end
 
+local assets = {}
+
+function www.load(file)
+	assets[file] = www.base64(file)
+end
+
+function www.get(file)
+	return assets[file]
+end
+
 function www.base64(file)
-	-- ...
+	local ext = fs.extname(file)
+	local mime = mimes[ext]
+	if (mime) then
+		return "data:" .. mime .. ";base64," .. fs.base64(file)
+	end
 end
 
 function www.tag(tag, attrs, children)
@@ -169,7 +183,7 @@ function www.styles(list)
 	end
 
 	function handle_sheet_ex(sel, sheet)
-		local t = "{"
+		local t = sel .. "{"
 		local post = ""
 		for key, val in pairs(sheet) do
 			-- media
@@ -179,16 +193,13 @@ function www.styles(list)
 				end
 			-- pseudo class
 			elseif key:sub(1, 1) == ":" then
-				local nsel = sel .. key
-				post = post .. nsel .. handle_sheet_ex(nsel, val)
+				post = post .. handle_sheet_ex(sel .. key, val)
 			-- self
 			elseif key:sub(1, 1) == "&" then
-				local nsel = sel .. key:sub(2, #key)
-				post = post .. nsel .. handle_sheet_ex(nsel, val)
+				post = post .. handle_sheet_ex(sel .. key:sub(2, #key), val)
 			-- nesting child
 			elseif type(val) == "table" then
-				local nsel = sel .. " " .. key
-				post = post .. nsel .. handle_sheet_ex(nsel, val)
+				post = post .. handle_sheet_ex(sel .. " " .. key, val)
 			else
 				t = t .. key .. ":" .. val .. ";"
 			end
@@ -207,7 +218,7 @@ function www.styles(list)
 				text = text .. "}"
 			end
 		else
-			text = text .. sel .. handle_sheet_ex(sel, sheet)
+			text = text .. handle_sheet_ex(sel, sheet)
 		end
 	end
 

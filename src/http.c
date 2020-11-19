@@ -7,6 +7,8 @@
 #define HTTPSERVER_IMPL
 #include <httpserver.h>
 
+// TODO: expose http_respond for easy early response
+
 lua_State *lua;
 int handler_ref;
 
