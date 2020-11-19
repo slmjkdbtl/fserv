@@ -110,6 +110,9 @@ int l_is_dir(lua_State *L) {
 int l_extname(lua_State *L) {
 	const char *path = luaL_checkstring(L, 1);
 	const char *dot = strrchr(path, '.');
+	if (!dot) {
+		return 0;
+	}
 	lua_pushstring(L, dot + 1);
 	return 1;
 }

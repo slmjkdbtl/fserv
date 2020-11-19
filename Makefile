@@ -30,6 +30,10 @@ $(BIN_TARGET): $(SRC_FILES) res
 
 .PHONY: run
 run: $(BIN_TARGET)
+	$(BIN_TARGET)
+
+.PHONY: run-lua
+run-lua: $(BIN_TARGET)
 	$(BIN_TARGET) demo.lua
 
 .PHONY: res
