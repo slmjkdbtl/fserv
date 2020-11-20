@@ -1229,6 +1229,8 @@ void http_listen(http_server_t* serv, const char* ipaddr) {
   // Ignore SIGPIPE. We handle these errors at the call site.
   signal(SIGPIPE, SIG_IGN);
   serv->socket = socket(AF_INET, SOCK_STREAM, 0);
+  int flag = 1;
+  setsockopt(serv->socket, SOL_SOCKET, SO_REUSEPORT, &flag, sizeof(flag));
   hs_bind_localhost(serv->socket, &serv->addr, ipaddr, serv->port);
   serv->len = sizeof(serv->addr);
   int flags = fcntl(serv->socket, F_GETFL, 0);
