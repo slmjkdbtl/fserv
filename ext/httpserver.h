@@ -1022,6 +1022,16 @@ void hs_bind_localhost(int s, struct sockaddr_in* addr, const char* ipaddr, int 
   addr->sin_port = htons(port);
   int rc = bind(s, (struct sockaddr *)addr, sizeof(struct sockaddr_in));
   if (rc < 0) {
+    switch (errno) {
+      case EACCES:
+        fprintf(stderr, "port %d is in protected\n", port);
+        break;
+      case EADDRINUSE:
+        fprintf(stderr, "port %d is in use\n", port);
+        break;
+      default:
+        fprintf(stderr, "failed to bind\n");
+    }
     exit(1);
   }
 }
@@ -1219,8 +1229,6 @@ void http_listen(http_server_t* serv, const char* ipaddr) {
   // Ignore SIGPIPE. We handle these errors at the call site.
   signal(SIGPIPE, SIG_IGN);
   serv->socket = socket(AF_INET, SOCK_STREAM, 0);
-  int flag = 1;
-  setsockopt(serv->socket, SOL_SOCKET, SO_REUSEPORT, &flag, sizeof(flag));
   hs_bind_localhost(serv->socket, &serv->addr, ipaddr, serv->port);
   serv->len = sizeof(serv->addr);
   int flags = fcntl(serv->socket, F_GETFL, 0);
