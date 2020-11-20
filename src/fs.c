@@ -24,14 +24,15 @@ static int l_read_text(lua_State *L) {
 	size_t size = ftell(file);
 	fseek(file, 0, SEEK_SET);
 
-	char *buffer = malloc(size + 1);
-	fread(buffer, 1, size, file);
+	char *text = malloc(size + 1);
+	fread(text, 1, size, file);
 
-	buffer[size] = '\0';
+	text[size] = '\0';
 
 	fclose(file);
 
-	lua_pushstring(L, buffer);
+	lua_pushstring(L, text);
+	free(text);
 
 	return 1;
 
@@ -117,7 +118,7 @@ static int l_extname(lua_State *L) {
 	return 1;
 }
 
-static char encoding_table[] = {
+static char base64_table[] = {
 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
 	'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
 	'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -145,10 +146,10 @@ static char *base64_encode(const char *input, size_t isize, size_t *osize) {
 
 		uint32_t triple = (octet_a << 0x10) + (octet_b << 0x08) + octet_c;
 
-		output[j++] = encoding_table[(triple >> 3 * 6) & 0x3F];
-		output[j++] = encoding_table[(triple >> 2 * 6) & 0x3F];
-		output[j++] = encoding_table[(triple >> 1 * 6) & 0x3F];
-		output[j++] = encoding_table[(triple >> 0 * 6) & 0x3F];
+		output[j++] = base64_table[(triple >> 3 * 6) & 0x3F];
+		output[j++] = base64_table[(triple >> 2 * 6) & 0x3F];
+		output[j++] = base64_table[(triple >> 1 * 6) & 0x3F];
+		output[j++] = base64_table[(triple >> 0 * 6) & 0x3F];
 	}
 
 	for (int i = 0; i < mod_table[isize % 3]; i++) {
@@ -184,6 +185,7 @@ static int l_base64(lua_State *L) {
 
 	lua_pushstring(L, data);
 	free(data);
+	free(bytes);
 
 	return 1;
 
