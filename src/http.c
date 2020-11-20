@@ -1,5 +1,7 @@
 // wengwengweng
 
+#include <stdbool.h>
+
 #include <lua/lua.h>
 #include <lua/lualib.h>
 #include <lua/lauxlib.h>
@@ -13,6 +15,8 @@ lua_State *lua;
 int handler_ref;
 
 void handler(http_request_t *req) {
+
+	bool responded = false;
 
 	lua_settop(lua, 0);
 	lua_rawgeti(lua, LUA_REGISTRYINDEX, handler_ref);
@@ -88,11 +92,16 @@ void handler(http_request_t *req) {
 			lua_pop(lua, 1);
 
 			http_respond(req, res);
+			responded = true;
 
 		}
 
 		lua_pop(lua, 1);
 
+	}
+
+	if (!responded) {
+		http_request_free_buffer(req);
 	}
 
 }
