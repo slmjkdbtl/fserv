@@ -1,5 +1,16 @@
 -- wengwengweng
 
+function table.join(t1, t2)
+	local l = {}
+	for k, v in pairs(t1) do
+		l[k] = v
+	end
+	for k, v in pairs(t2) do
+		l[k] = v
+	end
+	return l
+end
+
 function table.map(t, f)
 	local l = {}
 	for i, v in ipairs(t) do
