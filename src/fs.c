@@ -210,6 +210,12 @@ static int l_base64(lua_State *L) {
 
 }
 
+static int l_chdir(lua_State *L) {
+	const char *path = luaL_checkstring(L, 1);
+	chdir(path);
+	return 0;
+}
+
 static const luaL_Reg funcs[] = {
 	{ "write_text", l_write_text, },
 	{ "read_text", l_read_text, },
@@ -219,6 +225,7 @@ static const luaL_Reg funcs[] = {
 	{ "is_dir", l_is_dir, },
 	{ "extname", l_extname, },
 	{ "base64", l_base64, },
+	{ "chdir", l_chdir, },
 	{ NULL, NULL, }
 };
 
