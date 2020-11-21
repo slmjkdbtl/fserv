@@ -153,6 +153,10 @@ function www.tag(tag, attrs, children)
 
 	text = text .. ">"
 
+	if (children ~= nil) then
+		text = text .. "\n"
+	end
+
 	if (type(children) == "string") then
 		text = text .. children
 	elseif (type(children) == "table") then
@@ -162,7 +166,7 @@ function www.tag(tag, attrs, children)
 	end
 
 	if (children ~= nil) then
-		text = text .. "</" .. tag .. ">"
+		text = text .. "\n</" .. tag .. ">\n"
 	end
 
 	return text
@@ -174,22 +178,22 @@ function www.styles(list)
 	local text = ""
 
 	function handle_sheet(s)
-		local t = "{"
+		local t = "{\n"
 		for k, v in pairs(s) do
-			t = t .. k .. ":" .. v .. ";"
+			t = t .. k .. ":" .. v .. ";\n"
 		end
-		t = t .. "}"
+		t = t .. "}\n"
 		return t
 	end
 
 	function handle_sheet_ex(sel, sheet)
-		local t = sel .. "{"
+		local t = sel .. " {\n"
 		local post = ""
 		for key, val in pairs(sheet) do
 			-- media
 			if key == "@media" then
 				for cond, msheet in pairs(val) do
-					post = post .. "@media " .. cond .. "{" .. sel .. handle_sheet(msheet) .. "}"
+					post = post .. "@media " .. cond .. "{\n" .. sel .. handle_sheet(msheet) .. "}\n"
 				end
 			-- pseudo class
 			elseif key:sub(1, 1) == ":" then
@@ -201,21 +205,21 @@ function www.styles(list)
 			elseif type(val) == "table" then
 				post = post .. handle_sheet_ex(sel .. " " .. key, val)
 			else
-				t = t .. key .. ":" .. val .. ";"
+				t = t .. key .. ":" .. val .. ";\n"
 			end
 		end
-		t = t .. "}" .. post
+		t = t .. "}\n" .. post
 		return t
 	end
 
 	for sel, sheet in pairs(list) do
 		if (sel == "@keyframes") then
 			for name, map in pairs(sheet) do
-				text = text .. "@keyframes " .. name .. "{"
+				text = text .. "@keyframes " .. name .. "{\n"
 				for time, fsheet in pairs(map) do
 					text = text .. time .. handle_sheet(fsheet)
 				end
-				text = text .. "}"
+				text = text .. "}\n"
 			end
 		else
 			text = text .. handle_sheet_ex(sel, sheet)

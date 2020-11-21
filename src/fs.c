@@ -11,6 +11,25 @@
 #include <lua/lualib.h>
 #include <lua/lauxlib.h>
 
+static int l_write_text(lua_State *L) {
+
+	const char *path = luaL_checkstring(L, 1);
+	const char *text = luaL_checkstring(L, 2);
+	FILE *file = fopen(path, "w");
+
+	if (!file) {
+		return 0;
+	}
+
+	size_t size = strlen(text);
+
+	fwrite(text, 1, size, file);
+	fclose(file);
+
+	return 0;
+
+}
+
 static int l_read_text(lua_State *L) {
 
 	const char *path = luaL_checkstring(L, 1);
@@ -192,6 +211,7 @@ static int l_base64(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
+	{ "write_text", l_write_text, },
 	{ "read_text", l_read_text, },
 	{ "read_bytes", l_read_bytes, },
 	{ "read_dir", l_read_dir, },
