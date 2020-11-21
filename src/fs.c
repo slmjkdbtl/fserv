@@ -174,7 +174,7 @@ static char base64_table[] = {
 
 static int mod_table[] = { 0, 2, 1, };
 
-static char *base64_encode(const char *input, size_t isize, size_t *osize) {
+static char *base64_encode(const unsigned char *input, size_t isize, size_t *osize) {
 
 	*osize = 4 * ((isize + 2) / 3);
 
@@ -183,9 +183,9 @@ static char *base64_encode(const char *input, size_t isize, size_t *osize) {
 
 	for (int i = 0, j = 0; i < isize;) {
 
-		uint32_t octet_a = i < isize ? (unsigned char)input[i++] : 0;
-		uint32_t octet_b = i < isize ? (unsigned char)input[i++] : 0;
-		uint32_t octet_c = i < isize ? (unsigned char)input[i++] : 0;
+		uint32_t octet_a = i < isize ? input[i++] : 0;
+		uint32_t octet_b = i < isize ? input[i++] : 0;
+		uint32_t octet_c = i < isize ? input[i++] : 0;
 
 		uint32_t triple = (octet_a << 0x10) + (octet_b << 0x08) + octet_c;
 

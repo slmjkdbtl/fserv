@@ -226,7 +226,7 @@ end
 function www.log(file, req, err)
 
 	local msg = ""
-	local date = os.date("%Y/%m/%d %H:%M")
+	local date = os.date("%Y/%m/%d %H:%M:%S")
 
 	msg = msg .. "== " .. date .. "\n"
 	msg = msg .. req.method .. " " .. req.target .. "\n"

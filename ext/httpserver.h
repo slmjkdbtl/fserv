@@ -1056,8 +1056,8 @@ void hs_free_buffer(http_request_t* session) {
 
 void hs_init_session(http_request_t* session) {
   session->flags = HTTP_AUTOMATIC;
-  session->parser = (http_parser_t){ };
-  session->stream = (hs_stream_t){ };
+  session->parser = (http_parser_t){0};
+  session->stream = (hs_stream_t){0};
   if (session->tokens.buf) {
     free(session->tokens.buf);
     session->tokens.buf = NULL;
@@ -1167,7 +1167,8 @@ void http_session(http_request_t* request) {
       hs_init_session(request);
       request->state = HTTP_SESSION_READ;
       if (request->server->memused > HTTP_MAX_TOTAL_EST_MEM_USAGE) {
-        return hs_error_response(request, 503, "Service Unavailable");
+        hs_error_response(request, 503, "Service Unavailable");
+        return;
       }
       // fallthrough
     case HTTP_SESSION_READ:
@@ -1348,7 +1349,7 @@ http_string_t http_request_header(http_request_t* request, char const * key) {
       }
     }
   }
-  return (http_string_t) { };
+  return (http_string_t) {0};
 }
 
 void http_request_free_buffer(http_request_t* request) {
