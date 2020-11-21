@@ -18,6 +18,27 @@ static int l_write_text(lua_State *L) {
 	FILE *file = fopen(path, "w");
 
 	if (!file) {
+		luaL_error(L, "failed to open file '%s'", path);
+		return 0;
+	}
+
+	size_t size = strlen(text);
+
+	fwrite(text, 1, size, file);
+	fclose(file);
+
+	return 0;
+
+}
+
+static int l_append_text(lua_State *L) {
+
+	const char *path = luaL_checkstring(L, 1);
+	const char *text = luaL_checkstring(L, 2);
+	FILE *file = fopen(path, "a");
+
+	if (!file) {
+		luaL_error(L, "failed to open file '%s'", path);
 		return 0;
 	}
 
@@ -36,6 +57,7 @@ static int l_read_text(lua_State *L) {
 	FILE *file = fopen(path, "r");
 
 	if (!file) {
+		luaL_error(L, "failed to open file '%s'", path);
 		return 0;
 	}
 
@@ -63,6 +85,7 @@ static int l_read_bytes(lua_State *L) {
 	FILE *file = fopen(path, "rb");
 
 	if (!file) {
+		luaL_error(L, "failed to open file '%s'", path);
 		return 0;
 	}
 
@@ -88,6 +111,7 @@ static int l_read_dir(lua_State *L) {
 	DIR *dir = opendir(path);
 
 	if (!dir) {
+		luaL_error(L, "failed to open dir '%s'", path);
 		return 0;
 	}
 
@@ -218,6 +242,7 @@ static int l_chdir(lua_State *L) {
 
 static const luaL_Reg funcs[] = {
 	{ "write_text", l_write_text, },
+	{ "append_text", l_append_text, },
 	{ "read_text", l_read_text, },
 	{ "read_bytes", l_read_bytes, },
 	{ "read_dir", l_read_dir, },
