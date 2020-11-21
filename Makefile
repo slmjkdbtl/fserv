@@ -22,12 +22,8 @@ $(BIN): $(SRC_FILES) res
 	@mkdir -p build
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $(BIN) $(SRC_FILES)
 
-.PHONY: run
-run: $(BIN)
-	$(BIN)
-
 .PHONY: run-lua
-run-lua: $(BIN)
+run: $(BIN)
 	$(BIN) demo.lua
 
 .PHONY: res

@@ -1,6 +1,6 @@
 -- wengwengweng
 
-local port = os.getenv("PORT") or 80
+local port = os.getenv("PORT") or 8000
 
 print("http://localhost:" .. port)
 

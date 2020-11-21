@@ -5,6 +5,7 @@ local t = www.tag
 
 print("http://localhost:" .. port)
 
+-- simple sass-like stylesheets
 local styles = {
 	["*"] = {
 		["margin"] = "0",
@@ -40,6 +41,7 @@ local styles = {
 	},
 }
 
+-- simple html templating
 local main = t("html", {}, {
 	t("head", {}, {
 		t("title", {}, "oh hi"),
@@ -53,7 +55,7 @@ local main = t("html", {}, {
 		t("li", {}, " - server side rendering"),
 		t("li", {}, " - archivability"),
 		t("div", { id = "links", }, {
-			t("a", { href = "https://github.com/slmjkdbtl/fserv", }, "code"),
+			t("a", { href = "/code", }, "code"),
 		}),
 	}),
 })
@@ -64,20 +66,25 @@ local goodstuff = t("html", {}, {
 		t("style", {}, www.styles(styles)),
 	}),
 	t("body", {}, {
+		-- embed images as base64
 		t("img", { id = "goodstuff", src = www.base64("103Exeggutor-Alola.png"), }),
-		t("p", {  }, "hi"),
+		t("p", {}, "hi"),
 	}),
 })
 
-function no()
-	return {
-		status = 404,
-		body = "no",
-	}
-end
-
+-- takes a function, use the return value as response
 http.serve(port, function(req)
 
+	-- request info
+	print(req.method .. " " .. req.target)
+
+	for k, v in pairs(req.headers) do
+		print(k .. ": " .. v)
+	end
+
+	print("---")
+
+	-- serve html
 	if (req.target == "/") then
 		return www.html(main)
 	end
@@ -86,7 +93,34 @@ http.serve(port, function(req)
 		return www.html(goodstuff)
 	end
 
-	return no()
+	-- redirecting
+	if (req.target == "/code") then
+		return www.redirect("https://github.com/slmjkdbtl/fserv")
+	end
+
+	-- serve static dir & files
+	local path = req.target:sub(2, #req.target)
+
+	if path == "" then
+		path = "."
+	end
+
+	if (fs.is_dir(path)) then
+		-- serves an html page with dir listing
+		return www.dir(path)
+	elseif (fs.is_file(path)) then
+		-- respond with file content and the assumed mime type
+		return www.file(path)
+	end
+
+	-- fallback to 404, custom response
+	return {
+		status = 404,
+		headers = {
+			["Content-Type"] = "text/plain",
+		},
+		body = "no",
+	}
 
 end)
 

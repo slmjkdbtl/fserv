@@ -179,7 +179,10 @@ static char *base64_encode(const unsigned char *input, size_t isize, size_t *osi
 	*osize = 4 * ((isize + 2) / 3);
 
 	char *output = malloc(*osize);
-	if (output == NULL) return NULL;
+
+	if (!output) {
+		return NULL;
+	}
 
 	for (int i = 0, j = 0; i < isize;) {
 
@@ -193,6 +196,7 @@ static char *base64_encode(const unsigned char *input, size_t isize, size_t *osi
 		output[j++] = base64_table[(triple >> 2 * 6) & 0x3F];
 		output[j++] = base64_table[(triple >> 1 * 6) & 0x3F];
 		output[j++] = base64_table[(triple >> 0 * 6) & 0x3F];
+
 	}
 
 	for (int i = 0; i < mod_table[isize % 3]; i++) {
