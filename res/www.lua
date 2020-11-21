@@ -34,13 +34,6 @@ local mimes = {
 	["gz"] = "application/gzip",
 }
 
-function www.printreq(req)
-	print(req.method .. " " .. req.target)
-	for k, v in pairs(req.headers) do
-		print(k .. ": " .. v)
-	end
-end
-
 function www.dir(path)
 
 	if (fs.is_dir(path)) then
@@ -227,6 +220,24 @@ function www.styles(list)
 	end
 
 	return text
+
+end
+
+function www.log(file, req, err)
+
+	local msg = ""
+	local date = os.date("%Y/%m/%d %H:%M")
+
+	msg = msg .. "== " .. date .. "\n"
+	msg = msg .. req.method .. " " .. req.target .. "\n"
+
+	for k, v in pairs(req.headers) do
+		msg = msg .. k .. ": " .. v .. "\n"
+	end
+
+	msg = msg .. err .. "\n"
+
+	fs.append_text(file, msg)
 
 end
 
