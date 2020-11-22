@@ -5,7 +5,7 @@ local t = www.tag
 
 print("http://localhost:" .. port)
 
--- simple sass-like stylesheets
+-- stylesheet
 local styles = {
 	["*"] = {
 		["margin"] = "0",
@@ -22,6 +22,7 @@ local styles = {
 	},
 	["a"] = {
 		["color"] = "blue",
+		-- supports sass-like nesting
 		[":hover"] = {
 			["background"] = "blue",
 			["color"] = "white",
@@ -99,11 +100,7 @@ http.serve(port, function(req)
 	end
 
 	-- serve static dir & files
-	local path = req.target:sub(2, #req.target)
-
-	if path == "" then
-		path = "."
-	end
+	local path = www.path(req.target)
 
 	if (fs.is_dir(path)) then
 		-- serves an html page with dir listing

@@ -48,12 +48,15 @@ function www.dir(path)
 				t("style", {}, www.styles({
 					["*"] = {
 						["font-family"] = "Monospace",
+						["font-size"] = "16px",
+						["text-decoration"] = "none",
 					},
 					["li"] = {
 						["list-style"] = "none",
 					},
 					["a"] = {
 						["color"] = "blue",
+						["outline"] = "none",
 						[":hover"] = {
 							["color"] = "white",
 							["background"] = "blue",
@@ -62,8 +65,15 @@ function www.dir(path)
 				}))
 			}),
 			t("body", {}, table.map(list, function(item)
+				local url = "/" .. item
+				if path ~= "." then
+					url = "/" .. path .. url
+				end
+				if fs.is_dir(item) then
+					item = item .. "/"
+				end
 				return t("li", {}, {
-					t("a", { href = string.format("%s/%s", path, item), }, item),
+					t("a", { href = url, }, item),
 				})
 			end)),
 		}))
@@ -235,6 +245,14 @@ function www.log(file, req, err)
 
 	fs.append_text(file, msg)
 
+end
+
+function www.path(target)
+	local path = target:gsub("^/", ""):gsub("/$", "")
+	if path == "" then
+		path = "."
+	end
+	return path
 end
 
 return www

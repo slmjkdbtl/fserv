@@ -6,11 +6,7 @@ print("http://localhost:" .. port)
 
 http.serve(port, function(req)
 
-	local path = req.target:sub(2, #req.target)
-
-	if path == "" then
-		path = "."
-	end
+	local path = www.path(req.target)
 
 	if (fs.is_dir(path)) then
 		return www.dir(path)
