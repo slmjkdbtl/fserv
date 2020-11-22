@@ -11,7 +11,7 @@
 #include <lua/lualib.h>
 #include <lua/lauxlib.h>
 
-static int l_write_text(lua_State *L) {
+static int l_write(lua_State *L) {
 
 	const char *path = luaL_checkstring(L, 1);
 	const char *text = luaL_checkstring(L, 2);
@@ -31,7 +31,7 @@ static int l_write_text(lua_State *L) {
 
 }
 
-static int l_append_text(lua_State *L) {
+static int l_append(lua_State *L) {
 
 	const char *path = luaL_checkstring(L, 1);
 	const char *text = luaL_checkstring(L, 2);
@@ -51,7 +51,7 @@ static int l_append_text(lua_State *L) {
 
 }
 
-static int l_read_text(lua_State *L) {
+static int l_read(lua_State *L) {
 
 	const char *path = luaL_checkstring(L, 1);
 	FILE *file = fopen(path, "r");
@@ -245,9 +245,9 @@ static int l_chdir(lua_State *L) {
 }
 
 static const luaL_Reg funcs[] = {
-	{ "write_text", l_write_text, },
-	{ "append_text", l_append_text, },
-	{ "read_text", l_read_text, },
+	{ "write", l_write, },
+	{ "append", l_append, },
+	{ "read", l_read, },
 	{ "read_bytes", l_read_bytes, },
 	{ "read_dir", l_read_dir, },
 	{ "is_file", l_is_file, },

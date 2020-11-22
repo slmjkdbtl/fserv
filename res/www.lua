@@ -51,6 +51,9 @@ function www.dir(path)
 						["font-size"] = "16px",
 						["text-decoration"] = "none",
 					},
+					["body"] = {
+						["padding"] = "6px",
+					},
 					["li"] = {
 						["list-style"] = "none",
 					},
@@ -243,7 +246,7 @@ function www.log(file, req, err)
 
 	msg = msg .. err .. "\n"
 
-	fs.append_text(file, msg)
+	fs.append(file, msg)
 
 end
 
