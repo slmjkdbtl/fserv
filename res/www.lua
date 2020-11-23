@@ -34,14 +34,50 @@ local mimes = {
 	["gz"] = "application/gzip",
 }
 
+function www.read_dir(path)
+
+	local dirs = {}
+	local files = {}
+	local entries = fs.read_dir(path)
+
+	for _, name in ipairs(entries) do
+
+		local entry = path .. "/" .. name
+		local list
+
+		if fs.is_dir(entry) then
+			list = dirs
+		elseif fs.is_file(entry) then
+			list = files
+		end
+
+		if list then
+			for i, item in ipairs(list) do
+				if name < item then
+					table.insert(list, i, name)
+					goto continue
+				end
+			end
+			list[#list + 1] = name
+		end
+
+		::continue::
+
+	end
+
+	return table.join(dirs, files)
+
+end
+
 function www.dir(path)
 
 	if (fs.is_dir(path)) then
 
-		local list = fs.read_dir(path)
+		local list = www.read_dir(path)
 		local t = www.tag
 
 		return www.html(t("html", {}, {
+
 			t("head", {}, {
 				t("title", {}, path),
 				t("meta", { charset = "utf-8", }),
@@ -67,18 +103,25 @@ function www.dir(path)
 					},
 				}))
 			}),
+
 			t("body", {}, table.map(list, function(item)
-				local url = "/" .. item
+
+				local url = item
+
 				if path ~= "." then
-					url = "/" .. path .. url
+					url = path .. "/" .. url
 				end
-				if fs.is_dir(item) then
+
+				if fs.is_dir(url) then
 					item = item .. "/"
 				end
+
 				return t("li", {}, {
-					t("a", { href = url, }, item),
+					t("a", { href = "/" .. url, }, item),
 				})
+
 			end)),
+
 		}))
 
 	end
@@ -129,7 +172,14 @@ end
 local assets = {}
 
 function www.load(file)
-	assets[file] = www.base64(file)
+	if (fs.is_dir(path)) then
+		local list = fs.read_dir(path)
+		for _, item in ipairs(list) do
+			www.load(path .. "/" .. item)
+		end
+	elseif (fs.is_file(path)) then
+		assets[path] = www.base64(path)
+	end
 end
 
 function www.get(file)
@@ -248,6 +298,10 @@ function www.log(file, req, err)
 
 	fs.append(file, msg)
 
+end
+
+function www.static(target, dir)
+	-- ...
 end
 
 function www.path(target)

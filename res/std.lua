@@ -2,11 +2,20 @@
 
 function table.join(t1, t2)
 	local l = {}
-	for k, v in pairs(t1) do
-		l[k] = v
-	end
-	for k, v in pairs(t2) do
-		l[k] = v
+	if t1[1] or t2[1] then
+		for i, v in ipairs(t1) do
+			l[i] = v
+		end
+		for i, v in ipairs(t2) do
+			l[#t1 + i] = v
+		end
+	else
+		for k, v in pairs(t1) do
+			l[k] = v
+		end
+		for k, v in pairs(t2) do
+			l[k] = v
+		end
 	end
 	return l
 end
