@@ -11,12 +11,14 @@
 #include <lua/lauxlib.h>
 
 #include "res/www.lua.h"
+#include "res/term.lua.h"
 #include "res/json.lua.h"
 #include "res/std.lua.h"
 #include "res/static.lua.h"
 
 int luaopen_fs(lua_State *L);
 int luaopen_http(lua_State *L);
+int luaopen_http2(lua_State *L);
 
 int luaopen_json(lua_State *L) {
 	json_lua[json_lua_len] = '\0';
@@ -31,6 +33,12 @@ int luaopen_www(lua_State *L) {
 	return 1;
 }
 
+int luaopen_term(lua_State *L) {
+	term_lua[term_lua_len] = '\0';
+	luaL_dostring(L, (const char*)term_lua);
+	return 1;
+}
+
 void run(const char *path) {
 
 	lua_State *L = luaL_newstate();
@@ -38,8 +46,10 @@ void run(const char *path) {
 
 	luaL_requiref(L, "fs", luaopen_fs, true);
 	luaL_requiref(L, "http", luaopen_http, true);
+	luaL_requiref(L, "http2", luaopen_http2, true);
 	luaL_requiref(L, "json", luaopen_json, true);
 	luaL_requiref(L, "www", luaopen_www, true);
+	luaL_requiref(L, "term", luaopen_term, true);
 
 	std_lua[std_lua_len] = '\0';
 	luaL_dostring(L, (const char*)std_lua);

@@ -32,6 +32,7 @@ local mimes = {
 	["zip"] = "application/zip",
 	["rtf"] = "application/rtf",
 	["gz"] = "application/gzip",
+	["wasm"] = "application/wasm",
 }
 
 function www.read_dir(path)
@@ -71,82 +72,102 @@ end
 
 function www.dir(path)
 
-	if (fs.is_dir(path)) then
-
-		local list = www.read_dir(path)
-		local t = www.tag
-
-		return www.html(t("html", {}, {
-
-			t("head", {}, {
-				t("title", {}, path),
-				t("meta", { charset = "utf-8", }),
-				t("style", {}, www.styles({
-					["*"] = {
-						["font-family"] = "Monospace",
-						["font-size"] = "16px",
-						["text-decoration"] = "none",
-					},
-					["body"] = {
-						["padding"] = "6px",
-					},
-					["li"] = {
-						["list-style"] = "none",
-					},
-					["a"] = {
-						["color"] = "blue",
-						["outline"] = "none",
-						[":hover"] = {
-							["color"] = "white",
-							["background"] = "blue",
-						},
-					},
-				}))
-			}),
-
-			t("body", {}, table.map(list, function(item)
-
-				local url = item
-
-				if path ~= "." then
-					url = path .. "/" .. url
-				end
-
-				if fs.is_dir(url) then
-					item = item .. "/"
-				end
-
-				return t("li", {}, {
-					t("a", { href = "/" .. url, }, item),
-				})
-
-			end)),
-
-		}))
-
+	if (path:sub(1, 1) == "/") then
+		return {
+			status = 400,
+			body = "bad request\n",
+		}
 	end
+
+	if (not fs.is_dir(path)) then
+		return {
+			status = 404,
+			body = "not found\n",
+		}
+	end
+
+	local list = www.read_dir(path)
+	local t = www.tag
+
+	return www.html(t("html", {}, {
+
+		t("head", {}, {
+			t("title", {}, path),
+			t("meta", { charset = "utf-8", }),
+			t("style", {}, www.styles({
+				["*"] = {
+					["font-family"] = "Monospace",
+					["font-size"] = "16px",
+					["text-decoration"] = "none",
+				},
+				["body"] = {
+					["padding"] = "6px",
+				},
+				["li"] = {
+					["list-style"] = "none",
+				},
+				["a"] = {
+					["color"] = "blue",
+					["outline"] = "none",
+					[":hover"] = {
+						["color"] = "white",
+						["background"] = "blue",
+					},
+				},
+			}))
+		}),
+
+		t("body", {}, table.map(list, function(item)
+
+			local url = item
+
+			if path ~= "." then
+				url = path .. "/" .. url
+			end
+
+			if fs.is_dir(url) then
+				item = item .. "/"
+			end
+
+			return t("li", {}, {
+				t("a", { href = "/" .. url, }, item),
+			})
+
+		end)),
+
+	}))
 
 end
 
 function www.file(path)
 
-	if (fs.is_file(path)) then
-
-		local ext = fs.extname(path)
-		local mime = mimes[ext]
-		local headers = {}
-
-		if (mime) then
-			headers["Content-Type"] = mime
-		end
-
+	if (path:sub(1, 1) == "/") then
 		return {
-			status = 200,
-			body = fs.read_bytes(path),
-			headers = headers,
+			status = 400,
+			body = "bad request\n",
 		}
-
 	end
+
+	if (not fs.is_file(path)) then
+		return {
+			status = 404,
+			body = "not found\n",
+		}
+	end
+
+	local ext = fs.extname(path)
+	local mime = mimes[ext]
+	local headers = {}
+
+	if (mime) then
+		headers["Content-Type"] = mime
+	end
+
+	return {
+		status = 200,
+		body = fs.read_bytes(path),
+		headers = headers,
+	}
 
 end
 
@@ -155,16 +176,6 @@ function www.redirect(link)
 		status = 307,
 		headers = {
 			["Location"] = link,
-		},
-	}
-end
-
-function www.html(t)
-	return {
-		status = 200,
-		body = "<!DOCTYPE html>" .. t .. "\n",
-		headers = {
-			["Content-Type"] = "text/html",
 		},
 	}
 end
@@ -219,6 +230,59 @@ function www.tag(tag, attrs, children)
 
 	if (children ~= nil) then
 		text = text .. "</" .. tag .. ">"
+	end
+
+	return text
+
+end
+
+function www.tag2(tag, attrs, children)
+	return {
+		tag = tag,
+		attrs = attrs,
+		children = children,
+	}
+end
+
+function www.html(t)
+	return {
+		status = 200,
+		body = "<!DOCTYPE html>" .. t .. "\n",
+		headers = {
+			["Content-Type"] = "text/html",
+		},
+	}
+end
+
+function www.html2(t)
+
+	local text = ""
+
+	text = "<" .. t.tag
+
+	for k, v in pairs(t.attrs) do
+		if (type(v) == "string") then
+			v = "\"" .. v .. "\""
+		end
+		text = text .. " " .. k .. "=" .. v
+	end
+
+	text = text .. ">"
+
+	if (type(t.children) == "string") then
+		text = text .. t.children
+	elseif (type(t.children) == "table") then
+		for _, c in ipairs(t.children) do
+			text = text .. www.html2(c)
+		end
+	end
+
+	if (t.children ~= nil) then
+		text = text .. "</" .. t.tag .. ">"
+	end
+
+	if t.tag == "html" then
+		text = "<!DOCTYPE html>" .. text .. "\n"
 	end
 
 	return text
@@ -305,11 +369,15 @@ function www.static(target, dir)
 end
 
 function www.path(target)
+
 	local path = target:gsub("^/", ""):gsub("/$", "")
+
 	if path == "" then
 		path = "."
 	end
+
 	return path
+
 end
 
 return www

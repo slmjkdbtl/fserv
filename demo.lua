@@ -1,6 +1,6 @@
 -- wengwengweng
 
-local port = os.getenv("PORT") or 8000
+local port = os.getenv("PORT") or 80
 local t = www.tag
 
 print("http://localhost:" .. port)
@@ -72,6 +72,23 @@ local goodstuff = t("html", {}, {
 		t("p", {}, "hi"),
 	}),
 })
+
+-- http2.serve(port, function(req)
+-- 	print(req.method)
+-- 	print(req.target)
+-- 	print(req.version)
+-- 	for k, v in pairs(req.headers) do
+-- 		print(k .. ": " .. v)
+-- 	end
+-- 	return {
+-- 		status = 200,
+-- 		body = "hi",
+-- 		headers = {
+-- 			["Content-Type"] = "text/plain",
+-- 		},
+-- 	}
+-- 	return "HTTP/1.1 200 OK\r\n\r\nhi\n"
+-- end)
 
 -- takes a function, use the return value as response
 http.serve(port, function(req)

@@ -102,6 +102,7 @@ void handler(http_request_t *req) {
 
 	if (!responded) {
 		http_request_free_buffer(req);
+		// TODO: empty response and close socket
 	}
 
 }
@@ -110,7 +111,7 @@ static int l_serve(lua_State *L) {
 	lua = L;
 	int port = luaL_checkinteger(L, 1);
 	handler_ref = luaL_ref(L, LUA_REGISTRYINDEX);
-	http_server_t* server = http_server_init(port, handler);
+	http_server_t *server = http_server_init(port, handler);
 	http_server_listen(server);
 	return 0;
 }
